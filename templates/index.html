@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motivational Quote Generator</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Motivational Quote Generator</h1>
+
+        <div class="controls">
+            <button id="random-btn">Random Quote</button>
+
+            <div class="mood-group">
+                <select id="mood-select">
+                    <option value="" disabled selected>Select a mood</option>
+                    <option value="focus">Focus</option>
+                    <option value="confidence">Confidence</option>
+                    <option value="calm">Calm</option>
+                    <option value="energy">Energy</option>
+                </select>
+                <button id="mood-btn">Generate</button>
+            </div>
+        </div>
+
+        <div id="quote-display" class="quote-display hidden">
+            <p id="quote-text" class="quote-text"></p>
+            <p id="quote-author" class="quote-author"></p>
+        </div>
+
+        <p id="error-msg" class="error-msg hidden"></p>
+    </div>
+
+    <script>
+        const quoteDisplay = document.getElementById("quote-display");
+        const quoteText = document.getElementById("quote-text");
+        const quoteAuthor = document.getElementById("quote-author");
+        const errorMsg = document.getElementById("error-msg");
+        const randomBtn = document.getElementById("random-btn");
+        const moodBtn = document.getElementById("mood-btn");
+        const moodSelect = document.getElementById("mood-select");
+
+        function showQuote(data) {
+            errorMsg.classList.add("hidden");
+            quoteText.textContent = '"' + data.text + '"';
+            quoteAuthor.textContent = "— " + data.author;
+            quoteDisplay.classList.remove("hidden");
+        }
+
+        function showError(message) {
+            quoteDisplay.classList.add("hidden");
+            errorMsg.textContent = message;
+            errorMsg.classList.remove("hidden");
+        }
+
+        async function fetchQuote(url) {
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    showQuote(data);
+                }
+            } catch {
+                showError("Failed to fetch quote. Please try again.");
+            }
+        }
+
+        randomBtn.addEventListener("click", function () {
+            fetchQuote("/api/random");
+        });
+
+        moodBtn.addEventListener("click", function () {
+            const mood = moodSelect.value;
+            if (!mood) {
+                showError("Please select a mood first.");
+                return;
+            }
+            fetchQuote("/api/random/" + mood);
+        });
+    </script>
+</body>
+</html>
